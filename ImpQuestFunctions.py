@@ -3,7 +3,7 @@ import random
 RAT_STATS = ("Rat",3,4,3,5,3)                   #Tuples containing all the info for the enemies, first slot is their name, 2nd is Strength value, 3rd is Dex, 4th is Mind, 5th is Speed, and 6th is gold amount when defeated
 SLIME_STATS = ("Slime",2,2,2,2,1)
 BAT_STATS = ("Bat",4,4,4,9,3)
-TROLL_STATS = ("Troll",8,4,3,3,6)
+TROLL_STATS = ("Troll",8,5,5,3,7)
 WOLF_STATS = ("Wolf",5,5,4,7,5)
 
 
@@ -11,7 +11,7 @@ def m_stats(stats_mstats: list, index: int, amount: int):       #Modifies a spec
     stats_mstats[index] = stats_mstats[index] + amount
     return stats_mstats
 
-def check_inv(stats_check_inv: list):                           #Checks the last 4 indexes (the players inventory) in the Stat list and checks if any of them are empty or not, if it finds one, it will return the index of the first-
+def check_inv_for_empty(stats_check_inv: list):                           #Checks the last 4 indexes (the players inventory) in the Stat list and checks if any of them are empty or not, if it finds one, it will return the index of the first-
     emptyindex: int = -1                                        #empty slot it finds, otherwise it will return -1 which indicates that the player has no room for more items
     for i in range(7,11):
         if stats_check_inv[i]==0:
@@ -19,6 +19,43 @@ def check_inv(stats_check_inv: list):                           #Checks the last
             break
     return emptyindex
 
+def use_item(stats_use_item: list):
+    itemlist = stats_use_item[-4:]
+    nameindex = ["Meat", "Apple", "Bread", "Cheese", "Magic Potion"]
+    itemchoice: int = -1
+    print(itemlist)
+    if(all(i == 0 for i in itemlist)):
+        print ("You have no items to use")
+        return
+    print("**********************")
+    print("INVENTORY (enter the items corresponding number to use, or 0 to go back)\n")
+    for index, x in enumerate(itemlist):
+        if( x== 1):
+            print(index+1, ")", nameindex[0])
+        elif(x == 2):
+            print(index+1, ")", nameindex[1])
+        elif(x == 3):
+            print(index+1, ")", nameindex[2])
+        elif(x == 4):
+            print(index+1, ")", nameindex[3])
+        elif(x == 5):
+            print(index+1, ")", nameindex[4])
+        else:
+            print(index+1, ") none")
+    print("\n**********************")
+    while(itemchoice not in (0,1,2,3,4)):
+        itemchoice = input("")
+    if(itemchoice == 0):
+        return
+    else:
+        print("Do you want to use ", nameindex[itemchoice-1], "? (1 for yes, 0 for no)")
+        itemchoice = -1
+        while(itemchoice not in (0,1)):
+                itemchoice = input("")
+        if(itemchoice == 0):
+            return
+
+        print("You consumed ", )
 def d_stats(stats_dstats: list):                                #Function used to display all relevant information on the Imp's status to the player
     print(f"\nImp's current status: \n")
     print(f"***************************\n")
@@ -77,9 +114,9 @@ def d_stats(stats_dstats: list):                                #Function used t
         elif i==4:
             print("cheese ", end="|")
         elif i==5:
-            print("bomb ", end="|")
-        elif i==6:
             print("magic potion ", end="|")
+        elif i==6:
+            print("bomb ", end="|")
         else:
             print("", end="")
 
@@ -153,9 +190,19 @@ def battle_scenario(stats_battle_scenario: list):                       #The fun
 
         
 
-    
+def between_scenario(stats_between_scenario: list):
+    choice: int = 0
+    print("\n*******************")
+    print("Do you want to use an item, or continue forward? (1 to continue, 2 to use an item)")
+    while choice not in (1,2):
+        choice = input(int)
+    if(choice==1):
+        use_item(stats_between_scenario)
+    elif(choice==2):
+        print("You decide to venture forth...")
 
-def trade_scenario(stats_trade_scenario: list):                     #Function that determines how trading works
+def trade_scenario(stats_trade_scenario: list):
+    print("\n*******************")                     #Function that determines how trading works
     print("Trade Scenario hasn't been finished yet!")
     return 0
 
