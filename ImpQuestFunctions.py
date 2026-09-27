@@ -6,6 +6,7 @@ BAT_STATS = ("Bat",4,4,4,9,3)
 TROLL_STATS = ("Troll",8,5,5,5,7)
 WOLF_STATS = ("Wolf",5,5,4,7,5)
 MIMIC_STATS = ("Mimic", 7,7,7,7,10)
+DRAGON_STATS = ("Dragon", 9,9,9,9,10)
 
 MEAT_STATS = ("Meat", 1, 1, 0, 0, 0, 5, "Restores health and increases Strength by 1.")                 #Tuples containing all the info for inventory items, first slot is their name, 2nd is Strength value, 3rd is Dex, 4th is Mind, 5th is Speed, 6th is base cost in gold, and 7th is its description
 APPLE_STATS = ("Apple", 1, 0, 1, 0, 0, 5, "Restores health and increases Dex by 1.")
@@ -156,8 +157,9 @@ def use_item(stats_use_item: list):                         #Function that check
         return
     elif(confirmchoice == 1):                               #Uses the item that you have selected
         print("You consumed ", returniteminfo(itemlist[itemchoice-1], 0))
-        for m in (1,2,3,4,5):                               #Loops through the user's Health, Strength, Dex, Mind, and Speed and modifies them based on the stats of the item you just used
+        for m in range(1,5):                               #Loops through the user's Health, Strength, Dex, Mind, and Speed and modifies them based on the stats of the item you just used
             m_stats(stats_use_item, m - 1, returniteminfo(itemlist[itemchoice - 1], m))
+            print(returniteminfo(itemlist[itemchoice - 1], m))
         itemlist[itemchoice - 1] = 0                        #sets the item of what you just used to 0, getting rid of it from your inventory and then takes itemlist and adds it back to the original stat list before returning it
         stats_use_item[-4:] = itemlist
         return stats_use_item
@@ -316,19 +318,18 @@ def battle_scenario(stats_battle_scenario: list, encounternum: int, Mimic_Encoun
         
 
 def between_scenario(stats_between_scenario: list):         #The function that plays after 1 of the 3 scenarios that let's you use any items you might have before continuing to the next scenario
-    choice: int = 0
+    choice: int = -1
     print("\n*******************")
-    print("Do you want to use an item, or continue forward? (1 to continue, 2 to use an item)") #Gives the player a choice whether to use an item or just move on
+    print("Do you want to use an item, or continue forward? (Enter to 1 continue, 2 to use an item)") #Gives the player a choice whether to use an item or just move on
     while choice not in (1, 2):
         try:
             choice = int(input())       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
         except ValueError:
-            print("Please enter 1 or 2.")
+            print("Please press enter or 1.")
     if(choice==2):
         use_item(stats_between_scenario)        #If you choose to use an item, it will call the use_item function
     elif(choice==1):
         print("You decide to venture forth...") #If you choose not to use an item, it will display a message before letting you continue
-        choice = 0
         buffer()
         return
 
@@ -343,9 +344,9 @@ def trade_scenario(stats_trade_scenario: list):
     print("You have encountered a Trader!!")
     while choice1 not in (1, 0):
         try:
-            choice1 = int(input("Would you like to buy something from the trader? (1 for yes 0 for no)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
+            choice1 = int(input("Would you like to buy something from the trader? (enter for yes 0 for no)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
         except ValueError:
-            print("Please enter 1 or 0.")
+            print("Please enter 0 or enter.")
     if(choice1==1):    
         print("You have ", stats_trade_scenario[6], "Gold")
         print("The Trader is selling the following items: ")
@@ -410,9 +411,9 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
     print("You have found a treasure chest!!!")
     while choice1 not in (1, 0):
             try:
-                choice1 = int(input("Would you like to open it up? (1 for yes 0 for no)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
+                choice1 = int(input("Would you like to open it up? (enter 1 for yes, 0 for no)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
             except ValueError:
-                print("Please enter 1 or 0.")
+                print("Please press enter or 0.")
     if(choice1==1):
         print("You opened the treasure chest. Inside there's...")
         buffer()
@@ -432,7 +433,7 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
             else:
                 treasure_id = 0
         else:
-            treasure_id = random.randint(0, 12)
+            treasure_id = random.randint(1, 12)
 
         if(treasure_id>0):
             print("You found a ", returniteminfo(treasure_id,0), "!!!")
@@ -499,4 +500,81 @@ def create_scenario(stats_create_scenario: list, encounternum: int):            
         trade_scenario(stats_create_scenario)                       #generate trade scenario by calling the tradecenario function
     elif(dicerole>BATTLECHANCE+TRADECHANCE):
         treasure_scenario(stats_create_scenario, encounternum)                    #generate treasure scenario by calling the trasurescenario function
-        
+
+def dragon_scenario(stats_dragon_scenario):
+    enemystats = ["",9,9,9,9,0]                                  #List that takes the data from the above tuples to be used in the rest of the function
+    attacktype: int = 0                                                 #Which kind of attack the player chooses, it determines what stats will be rolled against eachother to determine the outcome of the battle                                               #The amount of damage the player has taken, it is counted up every time the player fails a role against an enemy
+    playerattackstat: int = 0
+    playerattackrole: int = 0
+    dragon_health: int = 3
+    print("You finally made it to the dragon's lair...")
+    buffer()
+    print("Are you ready?")
+    buffer()
+    print("Before you can think, the dragon flies down towards you and begins to attack!!!")
+    buffer()
+    print("\n*******[ FINAL ENCOUNTER ]*******")
+    while(stats_dragon_scenario[0]>0 and dragon_health>0):
+        print("The Dragon gives you an intimidating glare!")
+        print(f"1) Attack head-on")                                     #Attack will use the player and enemy's Strength stat for dice role
+        print(f"2) Attack deftly")                                      #Attack will use the player and enemy's Dex stat for dice role
+        print(f"3) Attack cunningly")                                   #Attack will use the player and enemy's Mind stat for dice role
+        print(f"4) Throw bomb")
+
+        while attacktype not in (1, 2, 3, 4):                           #Make sure the user inputs a valid number
+            try:
+                attacktype = int(input("Choose wisely...: "))
+            except ValueError:
+                print("Invalid input. Please enter a number from 1 to 4.")
+                continue
+            if (attacktype == 1):
+                playerattackstat = stats_dragon_scenario[1]             #Player's attack stat will be their strength stat
+            elif(attacktype == 2):
+                playerattackstat = stats_dragon_scenario[2]             #Player's attack stat will be their dex stat
+            elif(attacktype == 3):
+                playerattackstat = stats_dragon_scenario[3]             #Player's attack stat will be their mind stat
+            elif(attacktype == 4):
+                if(has_bomb(stats_dragon_scenario)):
+                    print("You threw a bomb!!")
+                    buffer()
+                    if(random.randint(1,2)==2):
+                        print("It Hit!!")
+                        dragon_health += -1
+                    else:
+                        print("It didn't work...")
+                        buffer()
+                        print("The dragon attacked you in retaliation!")
+                        stats_dragon_scenario[0] += -random.randint(1,2)
+                else:
+                    print("You do not have a bomb to throw")
+                    attacktype = 0
+        playerattackrole = random.randint(playerattackstat, 10)
+        if(playerattackrole>enemystats[attacktype]):
+            print("You got a hit!!")
+            dragon_health += -1
+            buffer()
+            attacktype = 0
+        else:
+            print("Your attack didn't land...")
+            buffer()
+            print("The dragon attacked you in retaliation!")
+            print("\n")
+            stats_dragon_scenario[0] += -random.randint(1,2)
+            attacktype = 0
+    if(stats_dragon_scenario[0]<=0):
+        print("You were defeated by the Dragon...")
+        print("GAME OVER")
+        return
+    else:
+        print("The Dragon has fallen...")
+        buffer()
+        print("You slayed the Dragon!! Now all of its riches are yours to keep!!")
+        buffer()
+        print("\tConglatueration !!!")
+        buffer("\tYou have complete\n\t a great game")
+        print()
+        print("\tAnd Prooved the Justice \n\tof our culture.")
+        buffer()
+        print("\tNow go and rest our\n\t heroes !")
+            
+ 

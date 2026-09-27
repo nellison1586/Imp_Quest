@@ -22,7 +22,8 @@ IMPINV3: int = 0
 
 tally_scenarios: int =0                 #Keeps track of the current amount of scenarios there are 
 tally_encounters: int =1                #Keeps track of how many battles you've had
-MAX_SCENARIOS: int =20                  #The maximum amount of scenarios that can accure before the game ends
+MAX_ENCOUNTERS: int =25                  #The maximum amount of scenarios that can accure before the game ends
+choice = 1
 
 IMPSTATS = [IMPHEALTH,IMPSTR,IMPDEX,IMPMIND,IMPSPEED,IMPWEP,IMPGOLD,IMPINV0,IMPINV1,IMPINV2,IMPINV3]
 
@@ -31,17 +32,26 @@ print("WELCOME TO IMP QUEST!! ")
 print("***********************")
 
 iqf.buffer()
-
-while(IMPSTATS[0]>0 and tally_scenarios<MAX_SCENARIOS):                       #Main program loop, currently only have battle scenarios, but more are planned
-    iqf.d_stats(IMPSTATS)                                                     #Displays the Imp's current stats
+while(choice!=0):
+    print("You are a small Imp who has dreams to slay a mighty dragon and take its riches for yourself")
     iqf.buffer()
-    iqf.create_scenario(IMPSTATS, tally_encounters)                            #Randomly generate a scenario
-    tally_encounters += 1                                                     #Adds 1 to the tally encounter
-    if(IMPSTATS[0]>0):                                                        #If the player falls to an enemy, it will skip the between scenario function
+    print("Good luck, your journey is now ahead of you!")
+    iqf.buffer()
+    while(IMPSTATS[0]>0 and tally_encounters<MAX_ENCOUNTERS):                       #Main program loop, currently only have battle scenarios, but more are planned
+        iqf.d_stats(IMPSTATS)                                                     #Displays the Imp's current stats
         iqf.buffer()
-        iqf.between_scenario(IMPSTATS)
-    tally_scenarios +=1
+        iqf.create_scenario(IMPSTATS, tally_encounters)                            #Randomly generate a scenario
+        tally_encounters += 1                                                     #Adds 1 to the tally encounter
+        if(IMPSTATS[0]>0):                                                        #If the player falls to an enemy, it will skip the between scenario function
+            iqf.buffer()
+            iqf.between_scenario(IMPSTATS)
 
-if(IMPSTATS[0]<=0):                                                         #If you lose all your health it's game over
-    print("\nGAME OVER\n")
-    print("Try Again?")
+    if(IMPSTATS[0]<=0):                                                         #If you lose all your health it's game over
+        print("\nGAME OVER\n")
+        print("Try Again?")
+    elif(tally_encounters >= MAX_ENCOUNTERS and IMPSTATS[0] > 0):
+        iqf.dragon_scenario(IMPSTATS)
+
+    choice = int(input("Try Again? Press 1 to retry or 0 to exit: "))
+    tally_encounters = 0
+    IMPSTATS = [5,1,1,1,1,0,5,0,0,0,0]
