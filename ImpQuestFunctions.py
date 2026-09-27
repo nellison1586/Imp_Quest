@@ -14,15 +14,15 @@ CHEESE_STATS = ("Cheese", 1, 0, 0, 0, 1, 5, "Restores health and increases Speed
 MAGIC_POTION = ("Magic Potion", 3, 1, 1, 1, 1, 30, "Restores health and increases all stats by 1.")
 BOMB_STATS = ("Bomb", -5, 0, 0, 0, 0, 25, "Bomb to be used on enemies, DO NOT EAT!!")
 
-SWORD_STATS = ("Sword", 1, 1, 0, 0, 8)                                      ##Tuples containing all the info for weapons, first slot is their name, 2nd is Strength value, 3rd is Dex, 4th is Mind, 5th is Speed, 6th is base cost in gold
-MACE_STATS = ("Mace", 2, 1, 0, 0, 20)
-WAND_STATS = ("Wand", 0, 0, 1, 1, 8)
-STAFF_STATS = ("Staff", 1, 0, 2, 0, 20)
-DAGGER_STATS = ("Dagger", 0, 1, 0, 1, 8)
-BOW__STATS = ("Bow", 0, 2, 0, 1, 20 )
-MAGICSWORD_STATS = ("Magic Sword", 3, 1, 1, 1, 0)
-WIZARDSTAFF_STATS = ("Wizard Staff", 1, 1, 3, 1, 0)
-MAGICBOW_STATS = ("Magic Bow", 1, 3, 1, 1, 0)
+SWORD_STATS = ("Sword", 0, 1, 1, 0, 0, 8, "Weapon that increases Strength and Dex by 1 each")                                      ##Tuples containing all the info for weapons, first slot is their name, 2nd is Strength value, 3rd is Dex, 4th is Mind, 5th is Speed, 6th is base cost in gold
+MACE_STATS = ("Mace", 0, 2, 1, 0, 0, 20, "Weapon that increases Strength by 2 and Dex by 1")
+WAND_STATS = ("Wand", 0, 0, 0, 1, 1, 8, "Weapon that increases Mind and Speed by 1 each")
+STAFF_STATS = ("Staff", 0, 1, 0, 2, 0, 20, "Weapon that increases Strength by 1 and Mind by 2")
+DAGGER_STATS = ("Dagger", 0, 0, 1, 0, 1, 8, "Weapon that increases Dex and Speed by 1 each")
+BOW_STATS = ("Bow", 0, 0, 2, 0, 1, 20, "Weapon that increases Dex by 2 and Speed by 1" )
+MAGICSWORD_STATS = ("Magic Sword", 0, 3, 1, 1, 1, 0, "Rare Weapon that increases Strength by 3 and all other stats by 1")
+WIZARDSTAFF_STATS = ("Wizard Staff", 0, 1, 1, 3, 1, 0, "Rare Weapon that increases Mind by 3 and all other stats by 1")
+MAGICBOW_STATS = ("Magic Bow", 0, 1, 3, 1, 1, 0, "Rare Weapon that increases Dex by 3 and all other stats by 1")
 
 
 def m_stats(stats_mstats: list, index: int, amount: int):       #Modifies a specific value in a provided Stat list by a specified amount, used to change/add/lose health, stats, gold, items etc.
@@ -52,6 +52,14 @@ def check_inv_for_empty(stats_check_inv: list):                           #Check
             break
     return emptyindex
 
+def check_price(yourgold: int, cost: int):
+    if(yourgold-cost>=0):
+        return True
+    else:
+        return False
+ 
+
+
 def returniteminfo(i: int, j: int):                     #Returns an specified item's value at a specified index, used return values that modify health/stats/etc
     if( i== 1):
         return MEAT_STATS[j]
@@ -65,11 +73,38 @@ def returniteminfo(i: int, j: int):                     #Returns an specified it
         return MAGIC_POTION[j]
     elif(i == 6):
         return BOMB_STATS[j]
-    elif(i not in (1,2,3,4,5,6)):
-        return "none"
-    else:
+    elif(i == 7):
+        return SWORD_STATS[j]
+    elif(i == 8):
+        return MACE_STATS[j]
+    elif(i == 9):
+        return WAND_STATS[j]
+    elif(i == 10):
+        return STAFF_STATS[j]
+    elif(i == 11):
+        return DAGGER_STATS[j]
+    elif(i == 12):
+        return BOW_STATS[j]
+    elif(i == 13):
+        return MAGICSWORD_STATS[j]
+    elif(i == 14):
+        return WIZARDSTAFF_STATS[j]
+    elif(i == 15):
+        return MAGICBOW_STATS[j]
+    elif(i not in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)):
         return 0
- 
+
+def equip_item(stats_equip_item: list, newwepindex: int):
+    previous_weapon = stats_equip_item[5]
+
+    if previous_weapon != 0:
+        for stat_index in range(2, 6):
+            m_stats(stats_equip_item,stat_index-1,-returniteminfo(previous_weapon, stat_index))
+
+    stats_equip_item[5] = newwepindex
+
+    for stat_index in range(2, 6):
+        m_stats(stats_equip_item,stat_index-1,returniteminfo(newwepindex, stat_index))
 
 def use_item(stats_use_item: list):                         #Function that checks the users inventory for items, and then asks the user if they want to use items if there are any
     itemlist = stats_use_item[-4:]                          #takes the last 4 indexes in the user's stats (ie. the items) and puts them in their own list temperarily
@@ -116,7 +151,7 @@ def use_item(stats_use_item: list):                         #Function that check
 
 def d_stats(stats_dstats: list):                                #Function used to display all relevant information on the Imp's status to the player
     print(f"\nImp's current status: \n")
-    print(f"***************************\n")
+    print(f"***************************")
     print("\tCURRENT CONDITION: ", end=" ")
     if stats_dstats[0]==5:                                      #Health values are represented with text, showing how healthy the player is
         print("Great (5)")
@@ -139,23 +174,23 @@ def d_stats(stats_dstats: list):                                #Function used t
 
     
     print(f"\n\tWEAPON: ", end=" ")                             #Shows which weapon is currently equipped, a value of 0 will display 'none'
-    if stats_dstats[5]==1:
+    if stats_dstats[5]==7:
         print(SWORD_STATS[0])
-    elif stats_dstats[5]==2:
-        print(MACE_STATS[0])
-    elif stats_dstats[5]==3:
-        print(WAND_STATS[0])
-    elif stats_dstats[5]==4:
-        print(STAFF_STATS[0])
-    elif stats_dstats[5]==5:
-        print(DAGGER_STATS[0])
-    elif stats_dstats[5]==6:
-        print(BOW__STATS[0])
-    elif stats_dstats[5]==7:
-        print(MAGICSWORD_STATS[0])
     elif stats_dstats[5]==8:
-        print(WIZARDSTAFF_STATS[0])
+        print(MACE_STATS[0])
     elif stats_dstats[5]==9:
+        print(WAND_STATS[0])
+    elif stats_dstats[5]==10:
+        print(STAFF_STATS[0])
+    elif stats_dstats[5]==11:
+        print(DAGGER_STATS[0])
+    elif stats_dstats[5]==12:
+        print(BOW_STATS[0])
+    elif stats_dstats[5]==13:
+        print(MAGICSWORD_STATS[0])
+    elif stats_dstats[5]==14:
+        print(WIZARDSTAFF_STATS[0])
+    elif stats_dstats[5]==15:
         print(MAGICBOW_STATS[0])
     else:
         print("none")
@@ -178,8 +213,8 @@ def d_stats(stats_dstats: list):                                #Function used t
         else:
             print("", end="")
 
-    print(f"\n\tGOLD: ", stats_dstats[6])                               #How much gold the player is currently holding
-    print(f"\n***************************\n")
+    print(f"\tGOLD: ", stats_dstats[6])                               #How much gold the player is currently holding
+    print(f"***************************\n")
 
 
 def battle_scenario(stats_battle_scenario: list, encounternum: int):                      #The function that determines how battles play out, requires the list of stats as an argument
@@ -200,7 +235,7 @@ def battle_scenario(stats_battle_scenario: list, encounternum: int):            
     elif(enemyrole>90):
         enemystats = TROLL_STATS
 
-    print("\n*******[ENCOUNTER ", encounternum, "]*******")
+    print("\n*******[ ENCOUNTER ", encounternum, "]*******")
     print("You have encountered a " + enemystats[0] + "!!!")        #Displays the enemy name
     print("\nWhat shall you do?:")
     print(f"1) Attack head-on")                                     #Attack will use the player and enemy's Strength stat for dice role
@@ -268,9 +303,68 @@ def between_scenario(stats_between_scenario: list):         #The function that p
         return
 
 def trade_scenario(stats_trade_scenario: list):
+    choice1: int = -1
+    choice2: int = -1
+    selected_index = -1
+    traderslots = [0,0,0,0,0,0]
+    item_id =0
+    price =0
     print("\n*******************")                     #Function that determines how trading works
-    print("Trade Scenario hasn't been finished yet!")
-    return 0
+    print("You have encountered a Trader!!")
+    while choice1 not in (1, 0):
+        try:
+            choice1 = int(input("Would you like to buy something from the trader? (1 for yes 0 for no)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
+        except ValueError:
+            print("Please enter 1 or 0.")
+    if(choice1==1):    
+        print("You have ", stats_trade_scenario[6], "Gold")
+        print("The Trader is selling the following items: ")
+        for i in range(len(traderslots)):
+            if(i<3):
+                traderslots[i] = random.randint(1,12)
+            elif(i>=3):
+                traderslots[i] = returniteminfo(traderslots[i-3], 6) + random.randint(0,returniteminfo(traderslots[i-3], 6)//2)
+        for j in range(3):
+            if(j<3):
+                item_id = traderslots[j]
+                price = traderslots[j+3]
+                print(j+1, ")", returniteminfo(item_id,0), "-", price, "gold -", returniteminfo(item_id,7))
+        while choice2 not in (0,1,2,3):
+            try:
+                choice2 = int(input("Which item would you like to buy? (Enter number to choose item, or 0 to exit)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
+            except ValueError:
+                print("Please enter 0, 1, 2, or 3")
+            print("\n*******************") 
+            selected_index = choice2 -1
+            item_id = traderslots[selected_index]
+            price = traderslots[selected_index+3]
+            if(1 <= item_id <=6):
+                if(check_price(stats_trade_scenario[6], price) and check_inv_for_empty(stats_trade_scenario)!=-1):
+                    m_stats(stats_trade_scenario, check_inv_for_empty(stats_trade_scenario), item_id)
+                    m_stats(stats_trade_scenario, 6, 0 - price)
+                    print("Thank you for your purchase! Please come again!")
+                elif(check_inv_for_empty(stats_trade_scenario)==-1):
+                    print("Looks like your inventory is full. Come back when you have less stuff!")
+                    print("You leave the Trader")
+                    return
+                else:
+                    print("You can't afford this right now. Come back when you have more gold!")
+                    print("You leave the Trader")
+
+            elif(7 <= item_id <=12):
+                if(check_price(stats_trade_scenario[6], price)):
+                    equip_item(stats_trade_scenario, item_id)
+                    m_stats(stats_trade_scenario, 6, 0 - price)
+                    print("Thank you for your purchase! Please come again!")
+                    print("You leave the Trader")
+                else:
+                    print("You can't afford this right now. Come back when you have more gold!")
+                    print("You leave the Trader")
+    
+    elif(choice1==0):
+        print("You decided not to buy anything")
+        return
+
 
 def treasure_scenario(stats_treasure_scenario: list):               #Function that determines how finding a treasure chest works
     print("Treasure scenario hasn't been finished yet!!")
@@ -278,8 +372,8 @@ def treasure_scenario(stats_treasure_scenario: list):               #Function th
 
 def create_scenario(stats_create_scenario: list, encounternum: int):                   #Function that generates 1 of the 3 above scenarios at a specified chance
     TOTALCHANCE: int = 0                                            #Adds up the % chance of all 3 scenarios
-    BATTLECHANCE: int = 100                                         #% chance that a battle scenario will be generated
-    TRADECHANCE: int = 0                                            #% chance that a trade scenario will be generated
+    BATTLECHANCE: int = 50                                         #% chance that a battle scenario will be generated
+    TRADECHANCE: int = 50                                            #% chance that a trade scenario will be generated
     TREASURECHANCE: int = 0                                         #% chance that a treasure scenario will be generated
     ALLSCENARIOVALUES = [BATTLECHANCE, TRADECHANCE, TREASURECHANCE] #Store the 3 values in a list for later use
     for i in ALLSCENARIOVALUES:
