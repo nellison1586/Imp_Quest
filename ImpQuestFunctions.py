@@ -5,11 +5,44 @@ SLIME_STATS = ("Slime",2,2,2,2,1)
 BAT_STATS = ("Bat",4,4,4,9,3)
 TROLL_STATS = ("Troll",8,5,5,3,7)
 WOLF_STATS = ("Wolf",5,5,4,7,5)
+MIMIC_STATS = ("Mimic", 6,6,6,6,0)
+
+MEAT_STATS = ("Meat", 1, 1, 0, 0, 0, 5, "Restores health and increases Strength by 1.")                 #Tuples containing all the info for inventory items, first slot is their name, 2nd is Strength value, 3rd is Dex, 4th is Mind, 5th is Speed, 6th is base cost in gold, and 7th is its description
+APPLE_STATS = ("Apple", 1, 0, 1, 0, 0, 5, "Restores health and increases Dex by 1.")
+BREAD_STATS = ("Bread", 1, 0, 0, 1, 0, 5, "Restores health and increases Mind by 1.")
+CHEESE_STATS = ("Cheese", 1, 0, 0, 0, 1, 5, "Restores health and increases Speed by 1.")
+MAGIC_POTION = ("Magic Potion", 3, 1, 1, 1, 1, 30, "Restores health and increases all stats by 1.")
+BOMB_STATS = ("Bomb", -5, 0, 0, 0, 0, 25, "Bomb to be used on enemies, DO NOT EAT!!")
+
+SWORD_STATS = ("Sword", 1, 1, 0, 0, 8)                                      ##Tuples containing all the info for weapons, first slot is their name, 2nd is Strength value, 3rd is Dex, 4th is Mind, 5th is Speed, 6th is base cost in gold
+MACE_STATS = ("Mace", 2, 1, 0, 0, 20)
+WAND_STATS = ("Wand", 0, 0, 1, 1, 8)
+STAFF_STATS = ("Staff", 1, 0, 2, 0, 20)
+DAGGER_STATS = ("Dagger", 0, 1, 0, 1, 8)
+BOW__STATS = ("Bow", 0, 2, 0, 1, 20 )
+MAGICSWORD_STATS = ("Magic Sword", 3, 1, 1, 1, 0)
+WIZARDSTAFF_STATS = ("Wizard Staff", 1, 1, 3, 1, 0)
+MAGICBOW_STATS = ("Magic Bow", 1, 3, 1, 1, 0)
 
 
 def m_stats(stats_mstats: list, index: int, amount: int):       #Modifies a specific value in a provided Stat list by a specified amount, used to change/add/lose health, stats, gold, items etc.
-    stats_mstats[index] = stats_mstats[index] + amount
+    if(index==0):
+        if(stats_mstats[index]+amount>5):               #If Health is being modified, and the sum of the current amount and the amount that is added is over 5, set it to 5 (This makes it so 5 is the max health amount)
+            stats_mstats[0] = 5
+        else:
+            stats_mstats[0] += amount
+    elif(1 <= index <=4):                               #If the 4 main stats are being modified, and the sum of the current amount and the amount that is added is over 9, set it to 9 (This makes it so 9 is the stat cap)
+        if(stats_mstats[index]+amount>9):
+            stats_mstats[index]=9
+        else:
+            stats_mstats[index] += amount
+    else:
+        stats_mstats[index] += amount                   #All other indexes have no such limit since weapons and items are set directly and not simply added or subtracted
     return stats_mstats
+    
+
+def buffer():                                           #Buffer that displays a "Press Enter" and stays on screen until the user presses enter)
+    b=input("\n(Press Enter)")                          #Value doesn't matter since it's just used to control the speed of the game
 
 def check_inv_for_empty(stats_check_inv: list):                           #Checks the last 4 indexes (the players inventory) in the Stat list and checks if any of them are empty or not, if it finds one, it will return the index of the first-
     emptyindex: int = -1                                        #empty slot it finds, otherwise it will return -1 which indicates that the player has no room for more items
@@ -19,59 +52,84 @@ def check_inv_for_empty(stats_check_inv: list):                           #Check
             break
     return emptyindex
 
-def use_item(stats_use_item: list):
-    itemlist = stats_use_item[-4:]
-    nameindex = ["Meat", "Apple", "Bread", "Cheese", "Magic Potion"]
-    itemchoice: int = -1
-    print(itemlist)
-    if(all(i == 0 for i in itemlist)):
+def returniteminfo(i: int, j: int):                     #Returns an specified item's value at a specified index, used return values that modify health/stats/etc
+    if( i== 1):
+        return MEAT_STATS[j]
+    elif(i == 2):
+        return APPLE_STATS[j]
+    elif(i == 3):
+        return BREAD_STATS[j]
+    elif(i == 4): 
+        return CHEESE_STATS[j]
+    elif(i == 5):
+        return MAGIC_POTION[j]
+    elif(i == 6):
+        return BOMB_STATS[j]
+    elif(i not in (1,2,3,4,5,6)):
+        return "none"
+    else:
+        return 0
+ 
+
+def use_item(stats_use_item: list):                         #Function that checks the users inventory for items, and then asks the user if they want to use items if there are any
+    itemlist = stats_use_item[-4:]                          #takes the last 4 indexes in the user's stats (ie. the items) and puts them in their own list temperarily
+    itemchoice: int = -1                                    #The initial value of the choice when the game asks you which item you want to use
+    confirmchoice: int = -1                                 #The initial value of the choice when the game asks you if you want to confirm using the item
+    if(all(i == 0 for i in itemlist)):                      #If all values in the list are 0, then print a message and return to previous state
         print ("You have no items to use")
+        buffer()
         return
     print("**********************")
     print("INVENTORY (enter the items corresponding number to use, or 0 to go back)\n")
-    for index, x in enumerate(itemlist):
-        if( x== 1):
-            print(index+1, ")", nameindex[0])
-        elif(x == 2):
-            print(index+1, ")", nameindex[1])
-        elif(x == 3):
-            print(index+1, ")", nameindex[2])
-        elif(x == 4):
-            print(index+1, ")", nameindex[3])
-        elif(x == 5):
-            print(index+1, ")", nameindex[4])
-        else:
-            print(index+1, ") none")
-    print("\n**********************")
-    while(itemchoice not in (0,1,2,3,4)):
-        itemchoice = input("")
-    if(itemchoice == 0):
-        return
-    else:
-        print("Do you want to use ", nameindex[itemchoice-1], "? (1 for yes, 0 for no)")
-        itemchoice = -1
-        while(itemchoice not in (0,1)):
-                itemchoice = input("")
-        if(itemchoice == 0):
-            return
+    for index, x in enumerate(itemlist):                                #Goes through itemlist and prints out the name and which slot it occupies
+        print(index+1, ")", returniteminfo(x,0))
 
-        print("You consumed ", )
+    print("\n**********************")
+    while itemchoice not in (0,1,2,3,4):                #Loop that asks the user to enter 1 of 4 of your items, or 0 if you want to cancel
+        try:
+            itemchoice = int(input("Enter Value: "))    #Asks for valid input, and spits out an error if it isn't
+        except ValueError:
+            print("Must enter a valid number.")
+    if(itemchoice == 0):                                #Returns the user to previous state if you enter 0
+        between_scenario(stats_use_item)
+        return
+    if(itemlist[itemchoice-1] in (1,2,3,4,5)):              #Asks the user to confirm your choice to use an item
+        print(returniteminfo(itemlist[itemchoice-1], 7), "Confirm your choice (1 for yes, 0 for no)")
+    elif(itemlist[itemchoice-1] == 6):                      #Special message if the item selected is a bomb, since you're not suppose to use it outside of a battle (you can but it will kill you automatically)
+        print(returniteminfo(itemlist[itemchoice-1], 7), "You really shouldn't use this right now... (1 for yes, 0 for no)")
+    while confirmchoice not in (0,1):                       #Asks for valid input, spits out an error if it isn't
+        try:
+            confirmchoice = int(input())
+        except ValueError:
+            print("Must enter a valid number.")
+    if(confirmchoice == 0):                                 #Cancels using the item and boots you back to a previous state
+        between_scenario(stats_use_item)
+        return
+    elif(confirmchoice == 1):                               #Uses the item that you have selected
+        print("You consumed ", returniteminfo(itemlist[itemchoice-1], 0))
+        for m in (1,2,3,4,5):                               #Loops through the user's Health, Strength, Dex, Mind, and Speed and modifies them based on the stats of the item you just used
+            m_stats(stats_use_item, m - 1, returniteminfo(itemlist[itemchoice - 1], m))
+        itemlist[itemchoice - 1] = 0                        #sets the item of what you just used to 0, getting rid of it from your inventory and then takes itemlist and adds it back to the original stat list before returning it
+        stats_use_item[-4:] = itemlist
+        return stats_use_item
+
+
 def d_stats(stats_dstats: list):                                #Function used to display all relevant information on the Imp's status to the player
     print(f"\nImp's current status: \n")
     print(f"***************************\n")
     print("\tCURRENT CONDITION: ", end=" ")
     if stats_dstats[0]==5:                                      #Health values are represented with text, showing how healthy the player is
-        print("Great")
+        print("Great (5)")
     elif stats_dstats[0]==4:
-        print("Good")
+        print("Good (4)")
     elif stats_dstats[0]==3:
-        print("Fair")
+        print("okay (3)")
     elif stats_dstats[0]==2:
-        print("Bad")
+        print("Bad (2)")
     elif stats_dstats[0]==1:
-        print("Critical")
+        print("Critical (1)")
     else:
-        print("ERROR")                                          #There shouldn't be an instance where stats will be displayed if health is 0, so this let's me know if that accidentally happens
+        print(stats_dstats[0], "ERROR")                                          #There shouldn't be an instance where stats will be displayed if health is 0, so this let's me know if that accidentally happens
 
     print("\n\tCURRENT STATS:")
     print(f"\tSTRENGTH: ", stats_dstats[1])                     #Current Strength Stat
@@ -82,23 +140,23 @@ def d_stats(stats_dstats: list):                                #Function used t
     
     print(f"\n\tWEAPON: ", end=" ")                             #Shows which weapon is currently equipped, a value of 0 will display 'none'
     if stats_dstats[5]==1:
-        print("Sword")
+        print(SWORD_STATS[0])
     elif stats_dstats[5]==2:
-        print("Mace")
+        print(MACE_STATS[0])
     elif stats_dstats[5]==3:
-        print("Wand")
+        print(WAND_STATS[0])
     elif stats_dstats[5]==4:
-        print("Staff")
+        print(STAFF_STATS[0])
     elif stats_dstats[5]==5:
-        print("Dagger")
+        print(DAGGER_STATS[0])
     elif stats_dstats[5]==6:
-        print("Bow")
+        print(BOW__STATS[0])
     elif stats_dstats[5]==7:
-        print("Magic Sword")
+        print(MAGICSWORD_STATS[0])
     elif stats_dstats[5]==8:
-        print("Wizard Staff")
+        print(WIZARDSTAFF_STATS[0])
     elif stats_dstats[5]==9:
-        print("Magic Bow")
+        print(MAGICBOW_STATS[0])
     else:
         print("none")
 
@@ -106,17 +164,17 @@ def d_stats(stats_dstats: list):                                #Function used t
     print("\tITEMS:", end=" ")
     for i in items:
         if i==1:
-            print("meat ", end="|")
+            print(MEAT_STATS[0], end="|")
         elif i==2:
-            print("apple ", end="|")
+            print(APPLE_STATS[0], end="|")
         elif i==3:
-            print("bread ", end="|")
+            print(BREAD_STATS[0], end="|")
         elif i==4:
-            print("cheese ", end="|")
+            print(CHEESE_STATS[0], end="|")
         elif i==5:
-            print("magic potion ", end="|")
+            print(MAGIC_POTION[0], end="|")
         elif i==6:
-            print("bomb ", end="|")
+            print(BOMB_STATS[0], end="|")
         else:
             print("", end="")
 
@@ -124,7 +182,7 @@ def d_stats(stats_dstats: list):                                #Function used t
     print(f"\n***************************\n")
 
 
-def battle_scenario(stats_battle_scenario: list):                       #The function that determines how battles play out, requires the list of stats as an argument
+def battle_scenario(stats_battle_scenario: list, encounternum: int):                      #The function that determines how battles play out, requires the list of stats as an argument
     enemyrole = random.randint(1,100)                                   #Randomly generates a number from 1 to 100 to determine what enemy the player will encounter
     enemy_alive: bool = True                                            #Keeps track of whether the enemy is alive
     enemystats = ["", 0, 0, 0, 0, 0]                                    #List that takes the data from the above tuples to be used in the rest of the function
@@ -142,7 +200,7 @@ def battle_scenario(stats_battle_scenario: list):                       #The fun
     elif(enemyrole>90):
         enemystats = TROLL_STATS
 
-    print("\n*******************")
+    print("\n*******[ENCOUNTER ", encounternum, "]*******")
     print("You have encountered a " + enemystats[0] + "!!!")        #Displays the enemy name
     print("\nWhat shall you do?:")
     print(f"1) Attack head-on")                                     #Attack will use the player and enemy's Strength stat for dice role
@@ -167,7 +225,8 @@ def battle_scenario(stats_battle_scenario: list):                       #The fun
             print("You tried to flee...")
     while(enemy_alive):                                             #The main loop that determines the outcome of battle
         if(stats_battle_scenario[0]<=0):                            #Checks if the player is still alive and immediatly ends the loop if they are not
-            print("You have fallen in battle. Game Over...")        #ded
+            print("You were defeated by", enemystats[0])
+            print("You have fallen in battle...")        #ded
             return
         playerattackrole = random.randint(playerattackstat, 10)     #Random number ranging from the player's attack stat to 10
         #print(playerattackrole)
@@ -176,7 +235,7 @@ def battle_scenario(stats_battle_scenario: list):                       #The fun
             if(attacktype != 4):                                    #If the player chose any of the non-fleeing commands and succeeds the role, the enemy is no longer alive and ends the loop
                 enemy_alive = False
             else:
-                print(".. and successed!\n")                        #If the player chose to flee, end the function, which prevents you from gaining any gold
+                print(".. and successed and took ", tally_damage, "damage\n")                        #If the player chose to flee, end the function, which prevents you from gaining any gold
                 return
         else:
             m_stats(stats_battle_scenario, 0, -1)                   #If playerattackrole is lower than the enemie's stat, then you take 1 point of damage and retry the role until either you succeed or lose all your health
@@ -187,19 +246,26 @@ def battle_scenario(stats_battle_scenario: list):                       #The fun
         print("You have taken ", tally_damage, "damage\n")
         print("You have gained ", enemystats[5], "gold!!")
         m_stats(stats_battle_scenario, 6, enemystats[5])
+    return 1
 
         
 
-def between_scenario(stats_between_scenario: list):
+def between_scenario(stats_between_scenario: list):         #The function that plays after 1 of the 3 scenarios that let's you use any items you might have before continuing to the next scenario
     choice: int = 0
     print("\n*******************")
-    print("Do you want to use an item, or continue forward? (1 to continue, 2 to use an item)")
-    while choice not in (1,2):
-        choice = input(int)
-    if(choice==1):
-        use_item(stats_between_scenario)
-    elif(choice==2):
-        print("You decide to venture forth...")
+    print("Do you want to use an item, or continue forward? (1 to continue, 2 to use an item)") #Gives the player a choice whether to use an item or just move on
+    while choice not in (1, 2):
+        try:
+            choice = int(input())       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
+        except ValueError:
+            print("Please enter 1 or 2.")
+    if(choice==2):
+        use_item(stats_between_scenario)        #If you choose to use an item, it will call the use_item function
+    elif(choice==1):
+        print("You decide to venture forth...") #If you choose not to use an item, it will display a message before letting you continue
+        choice = 0
+        buffer()
+        return
 
 def trade_scenario(stats_trade_scenario: list):
     print("\n*******************")                     #Function that determines how trading works
@@ -210,7 +276,7 @@ def treasure_scenario(stats_treasure_scenario: list):               #Function th
     print("Treasure scenario hasn't been finished yet!!")
     return 0
 
-def create_scenario(stats_create_scenario: list):                   #Function that generates 1 of the 3 above scenarios at a specified chance
+def create_scenario(stats_create_scenario: list, encounternum: int):                   #Function that generates 1 of the 3 above scenarios at a specified chance
     TOTALCHANCE: int = 0                                            #Adds up the % chance of all 3 scenarios
     BATTLECHANCE: int = 100                                         #% chance that a battle scenario will be generated
     TRADECHANCE: int = 0                                            #% chance that a trade scenario will be generated
@@ -224,7 +290,7 @@ def create_scenario(stats_create_scenario: list):                   #Function th
         return stats_create_scenario
     dicerole = random.randint(1, TOTALCHANCE)                       #Random number is generated to use for the dice role
     if(dicerole<=BATTLECHANCE):
-        battle_scenario(stats_create_scenario)                      #generate battle scenario by calling the battlescenario function
+        battle_scenario(stats_create_scenario, encounternum)                      #generate battle scenario by calling the battlescenario function
     elif dicerole>BATTLECHANCE and dicerole <=BATTLECHANCE+TRADECHANCE:
         trade_scenario(stats_create_scenario)                       #generate trade scenario by calling the tradecenario function
     elif(dicerole>BATTLECHANCE+TRADECHANCE):

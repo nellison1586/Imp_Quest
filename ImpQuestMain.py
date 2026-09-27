@@ -15,10 +15,14 @@ IMPMIND: int = 1                        #Mind Value, makes 'cunning attacks' mor
 IMPSPEED: int = 1                       #Speed Value, makes running away more likely to succeed
 IMPWEP: int = 0                         #Weapon, the value that corrisponds with 1 of 9 different weapons, 0 means no weapon is equipped
 IMPGOLD: int = 0                        #The gold value that you have, gain gold from defeating foes
-IMPINV0: int = 4                        #Inventory slot 0-3, these slots can hold a number of different items, usually healing items that can be used to recover health and increase stats
+IMPINV0: int = 0                        #Inventory slot 0-3, these slots can hold a number of different items, usually healing items that can be used to recover health and increase stats
 IMPINV1: int = 0
 IMPINV2: int = 0
 IMPINV3: int = 0
+
+tally_scenarios: int =0                 #Keeps track of the current amount of scenarios there are 
+tally_encounters: int =1                #Keeps track of how many battles you've had
+MAX_SCENARIOS: int =20                  #The maximum amount of scenarios that can accure before the game ends
 
 IMPSTATS = [IMPHEALTH,IMPSTR,IMPDEX,IMPMIND,IMPSPEED,IMPWEP,IMPGOLD,IMPINV0,IMPINV1,IMPINV2,IMPINV3]
 
@@ -26,7 +30,18 @@ print("***********************")
 print("WELCOME TO IMP QUEST!! ")
 print("***********************")
 
+iqf.buffer()
 
-while(IMPSTATS[0]>0):                       #Main program loop, currently only have battle scenarios, but more are planned
-    iqf.d_stats(IMPSTATS)
-    iqf.create_scenario(IMPSTATS)
+while(IMPSTATS[0]>0 and tally_scenarios<MAX_SCENARIOS):                       #Main program loop, currently only have battle scenarios, but more are planned
+    iqf.d_stats(IMPSTATS)                                                     #Displays the Imp's current stats
+    iqf.buffer()
+    iqf.create_scenario(IMPSTATS,tally_encounters)                            #Randomly generate a scenario
+    tally_encounters += 1                                                     #Adds 1 to the tally encounter
+    if(IMPSTATS[0]>0):                                                        #If the player falls to an enemy, it will skip the between scenario function
+        iqf.buffer()
+        iqf.between_scenario(IMPSTATS)
+    tally_scenarios +=1
+
+if(IMPSTATS[0]<=0):                                                         #If you lose all your health it's game over
+    print("\nGAME OVER\n")
+    print("Try Again?")
