@@ -108,14 +108,14 @@ def equip_item(stats_equip_item: list, newwepindex: int):
         m_stats(stats_equip_item,stat_index-1,returniteminfo(newwepindex, stat_index))
 
 def has_bomb(stats_has_bomb: list):
-    for x in range(7,10):
+    for x in range(7,11):
         if(stats_has_bomb[x]==6):
             return True
     return False
 
 def return_bomb_slot(stats_return_bomb_slot):
     emptyindex: int = -1                                        #empty slot it finds, otherwise it will return -1 which indicates that the player has no room for more items
-    for i in range(7,10):
+    for i in range(7,11):
         if stats_return_bomb_slot[i]==6:
             emptyindex = i
             return emptyindex
@@ -337,7 +337,7 @@ def trade_scenario(stats_trade_scenario: list):
     choice1: int = -1
     choice2: int = -1
     selected_index = -1
-    traderslots = [0,0,0,0,0,0]
+    traderslots = [0,0,0,0,0,0]     #First 3 slots are the items, the last 3 slots are the price for their corresponding item
     item_id =0
     price =0
     print("\n*******************")                     #Function that determines how trading works
@@ -348,13 +348,13 @@ def trade_scenario(stats_trade_scenario: list):
         except ValueError:
             print("Please enter 0 or enter.")
     if(choice1==1):    
-        print("You have ", stats_trade_scenario[6], "Gold")
+        print("You have ", stats_trade_scenario[6], "Gold")     #Displays how much gold your carrying before you purchase
         print("The Trader is selling the following items: ")
-        for i in range(len(traderslots)):
+        for i in range(len(traderslots)):           #Roles the item and prices for said items
             if(i<3):
-                traderslots[i] = random.randint(1,12)
+                traderslots[i] = random.randint(1,12)   #roles the item's id
             elif(i>=3):
-                traderslots[i] = returniteminfo(traderslots[i-3], 6) + random.randint(0,returniteminfo(traderslots[i-3], 6)//2)
+                traderslots[i] = returniteminfo(traderslots[i-3], 6) + random.randint(0,returniteminfo(traderslots[i-3], 6)//2)     #Roles the item's price. Determined by the item's base price + 0 up to half the item's base price added on
         for j in range(3):
             if(j<3):
                 item_id = traderslots[j]
@@ -370,7 +370,7 @@ def trade_scenario(stats_trade_scenario: list):
                 selected_index = choice2 -1
                 item_id = traderslots[selected_index]
                 price = traderslots[selected_index+3]
-                if(1 <= item_id <=6):
+                if(1 <= item_id <=6):           #If the item is non-equipable, checks the inv to see if it's full or not
                     if(check_price(stats_trade_scenario[6], price) and check_inv_for_empty(stats_trade_scenario)!=-1):
                         m_stats(stats_trade_scenario, check_inv_for_empty(stats_trade_scenario), item_id)
                         m_stats(stats_trade_scenario, 6, 0 - price)
@@ -383,7 +383,7 @@ def trade_scenario(stats_trade_scenario: list):
                         print("You can't afford this right now. Come back when you have more gold!")
                         print("You leave the Trader")
 
-                elif(7 <= item_id <=12):
+                elif(7 <= item_id <=12):        #If the Item is an equippable item, it will always swap out with what you have as long as you can afford the new item
                     if(check_price(stats_trade_scenario[6], price)):
                         equip_item(stats_trade_scenario, item_id)
                         m_stats(stats_trade_scenario, 6, 0 - price)
@@ -396,15 +396,15 @@ def trade_scenario(stats_trade_scenario: list):
                 print("You changed your mind on buying something ")
                 return
     
-    elif(choice1==0):
+    elif(choice1==0):       #If you select 0, leave the trader and move on
         print("You decided not to buy anything")
         return
 
 
-def treasure_scenario(stats_treasure_scenario: list, encounternum: int): 
+def treasure_scenario(stats_treasure_scenario: list, encounternum: int):    #Function that runs the treasure scenario
     choice1: int = -1
     choice2: int = -1
-    MIMIC_CHANCE = 30
+    MIMIC_CHANCE = 30               #Chance that a mimic will spawn instead of a normal trasure
     treasure_id: int = -1
     treasure_drop: int =-1
     old_item_id: int =-1          
@@ -417,11 +417,11 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
     if(choice1==1):
         print("You opened the treasure chest. Inside there's...")
         buffer()
-        if(random.randint(1,100)>=100-MIMIC_CHANCE):
+        if(random.randint(1,100)>=100-MIMIC_CHANCE):                #Roles for a chance of a mimic spawning
             print("It was a Mimic!!!")
-            battle_scenario(stats_treasure_scenario, encounternum, True)
+            battle_scenario(stats_treasure_scenario, encounternum, True)    #Runs the battle scenario with extra code telling that a mimic spawned
 
-            treasure_drop = random.randint(1,5)
+            treasure_drop = random.randint(1,5)     #Encountering a mimc gives a chance for rare items to spawn instead of normal items
             if(treasure_drop==1):
                 treasure_id = 6
             elif(treasure_drop==2):
@@ -433,12 +433,12 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
             else:
                 treasure_id = 0
         else:
-            treasure_id = random.randint(1, 12)
+            treasure_id = random.randint(1, 12)         #Normal treasure spawn function
 
         if(treasure_id>0):
             print("You found a ", returniteminfo(treasure_id,0), "!!!")
             buffer()
-            if(1 <= treasure_id <=6):
+            if(1 <= treasure_id <=6):               #Checks if the item is a non-equipable item and sees if your inventory is full or not
                 if(check_inv_for_empty(stats_treasure_scenario)!=-1):
                     print("Added ", returniteminfo(treasure_id,0), "to your inventory!!")
                     m_stats(stats_treasure_scenario, check_inv_for_empty(stats_treasure_scenario), treasure_id)
@@ -446,12 +446,12 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
                 else:
                     print("Your inventory is currently full")
                     buffer()
-                    while choice2 not in (0,4):
+                    while choice2 not in (0,4):         #Gives the option to switch out a the treasure for one of your item slots
                         try:
                             choice2 = int(input("What item would you like to swap it out for? (Enter item number to swap, 0 to cancel)"))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
                         except ValueError:
                             print("Please enter a valid number.")
-                    for i in range(7,11):
+                    for i in range(7,11):               
                         print(i-6,")", returniteminfo(stats_treasure_scenario[i],0))
                     if(choice2!=0):
                         old_item_id = stats_treasure_scenario(choice2+6)
@@ -459,7 +459,7 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
                         m_stats(stats_treasure_scenario, choice2+6, -old_item_id)
                         m_stats(stats_treasure_scenario, choice2+6, treasure_id)
                         print("And replaced it with ", returniteminfo(treasure_id,0))
-            if(7 <= treasure_id <= 15):
+            if(7 <= treasure_id <= 15):         #If the item is an equipable item, always gives you the option to swap it out with your current weapon
                 
                 if(stats_treasure_scenario[5]!=0):
                     print("Do you want to equip the ", returniteminfo(treasure_id,0), "?")
@@ -468,11 +468,11 @@ def treasure_scenario(stats_treasure_scenario: list, encounternum: int):
                             choice2 = int(input("1 for yes, 0 for no: "))       #Repeatedly asks the user for an answer, and spits out an error if it isn't valid
                         except ValueError:
                             print("Please enter a valid number.")
-                    if(choice2==1):
+                    if(choice2==1):     #Code that asks you if you want to swap out your weapon
                         print("You threw out your ", returniteminfo(stats_treasure_scenario[5],0), " and replaced it with the", returniteminfo(treasure_id,0))
                         equip_item(stats_treasure_scenario, treasure_id)
                     else:
-                        print("You left the ", returniteminfo(treasure_id,0), "behind...")
+                        print("You left the ", returniteminfo(treasure_id,0), "behind...")  #Abandons weapon if you choose not to equip it
                 else:
                     print("You equipped the ", returniteminfo(treasure_id,0) )
                     equip_item(stats_treasure_scenario, treasure_id)
@@ -501,12 +501,12 @@ def create_scenario(stats_create_scenario: list, encounternum: int):            
     elif(dicerole>BATTLECHANCE+TRADECHANCE):
         treasure_scenario(stats_create_scenario, encounternum)                    #generate treasure scenario by calling the trasurescenario function
 
-def dragon_scenario(stats_dragon_scenario):
+def dragon_scenario(stats_dragon_scenario):                     #Function that controls the final dragon scenario
     enemystats = ["",9,9,9,9,0]                                  #List that takes the data from the above tuples to be used in the rest of the function
     attacktype: int = 0                                                 #Which kind of attack the player chooses, it determines what stats will be rolled against eachother to determine the outcome of the battle                                               #The amount of damage the player has taken, it is counted up every time the player fails a role against an enemy
     playerattackstat: int = 0
     playerattackrole: int = 0
-    dragon_health: int = 3
+    dragon_health: int = 3              #Dragon has health unlike other enemies
     print("You finally made it to the dragon's lair...")
     buffer()
     print("Are you ready?")
@@ -514,7 +514,7 @@ def dragon_scenario(stats_dragon_scenario):
     print("Before you can think, the dragon flies down towards you and begins to attack!!!")
     buffer()
     print("\n*******[ FINAL ENCOUNTER ]*******")
-    while(stats_dragon_scenario[0]>0 and dragon_health>0):
+    while(stats_dragon_scenario[0]>0 and dragon_health>0):              #Similar to battle scenario, but you can't flee
         print("The Dragon gives you an intimidating glare!")
         print(f"1) Attack head-on")                                     #Attack will use the player and enemy's Strength stat for dice role
         print(f"2) Attack deftly")                                      #Attack will use the player and enemy's Dex stat for dice role
@@ -537,44 +537,47 @@ def dragon_scenario(stats_dragon_scenario):
                 if(has_bomb(stats_dragon_scenario)):
                     print("You threw a bomb!!")
                     buffer()
-                    if(random.randint(1,2)==2):
-                        print("It Hit!!")
-                        dragon_health += -1
-                    else:
-                        print("It didn't work...")
-                        buffer()
-                        print("The dragon attacked you in retaliation!")
-                        stats_dragon_scenario[0] += -random.randint(1,2)
                 else:
                     print("You do not have a bomb to throw")
                     attacktype = 0
-        playerattackrole = random.randint(playerattackstat, 10)
-        if(playerattackrole>enemystats[attacktype]):
+        if attacktype == 4:         #If the player throws a bomb, it has a 50-50 shot of landing, lowering the dragons health by 1
+            m_stats(stats_dragon_scenario, return_bomb_slot(stats_dragon_scenario), -6) 
+            if(random.randint(1,2)==2):
+                print("It Hit!!")
+                dragon_health -= 1
+            else:
+                print("It didn't work...")
+                buffer()
+                print("The dragon attacked you in retaliation!")
+                stats_dragon_scenario[0] += -random.randint(1,2)
+            attacktype = 0
+            continue
+        playerattackrole = random.randint(playerattackstat, 10)         #Runs a attack role, similar to normal battles, but if you fail, subtract 1 or 2 health from the player
+        if(playerattackrole>enemystats[attacktype] and attacktype!=0):  #If successful, lower dragon health by 1 point and repeat this until either the player or dragon is dead
             print("You got a hit!!")
             dragon_health += -1
             buffer()
             attacktype = 0
-        else:
+        elif(playerattackrole<=enemystats[attacktype] and attacktype!=0):
             print("Your attack didn't land...")
             buffer()
             print("The dragon attacked you in retaliation!")
             print("\n")
             stats_dragon_scenario[0] += -random.randint(1,2)
             attacktype = 0
-    if(stats_dragon_scenario[0]<=0):
+    if(stats_dragon_scenario[0]<=0):                    #If the player runs out of health, run this
         print("You were defeated by the Dragon...")
         print("GAME OVER")
         return
     else:
-        print("The Dragon has fallen...")
+        print("The Dragon has fallen...")               #If the player succeeds run the success messages
         buffer()
         print("You slayed the Dragon!! Now all of its riches are yours to keep!!")
         buffer()
-        print("\tConglatueration !!!")
-        buffer("\tYou have complete\n\t a great game")
-        print()
-        print("\tAnd Prooved the Justice \n\tof our culture.")
+        print("\tConglatueration !!!")                  #Old gamaing reference, spelling mistakes are on purpose
         buffer()
+        print("\tYou have complete\n\t a great game")
+        buffer()
+        print("\tAnd Prooved the Justice \n\tof our culture.")
         print("\tNow go and rest our\n\t heroes !")
             
- 
