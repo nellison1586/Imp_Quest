@@ -1,9 +1,11 @@
 """
+    Imp Quest
+    Nick Ellison
     Imp Quest is a short text-based game where you make decisions for an Imp character by entering numerical inputs
     The Imp has health, and 4 types of stats that will dictate how well it will do against certain enemies
     Battles play out choosing 1 of 4 different actions, each action corrisponding to the Imp's stats
     The higher the stat the higher the chance of success against the enemy
-    If you run out of health, it's game over and the program exits
+    If you run out of health, it's game over and asks you if you want to try again
 """
 
 import ImpQuestFunctions as iqf         #All the functions are in the ImpQuestFunctions file to keep the main file a bit cleaner
